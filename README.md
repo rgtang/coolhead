@@ -12,34 +12,44 @@ clock does, and the audit log proves it.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    subgraph FE["Frontend: React + Vite"]
-        S[Store] --> C[Checkout]
-        C --> I[Interrogation]
-        I --> D[Dashboard]
+flowchart TB
+    subgraph UI["Frontend · React + Vite"]
+        direction LR
+        store[Store] --> checkout[Checkout] --> agent[Interrogation] --> dash[Dashboard]
     end
 
-    subgraph BE["Backend: Spring Boot + Spring AI"]
-        CK[CheckoutController] --> PP[PayPalClient]
-        CK --> G[GuardrailService]
-        G -->|rule fired| SM[OrderStateMachine]
-        G -->|no rule| IS[InterrogationService]
-        IS --> VS[VerdictService]
-        FC[FactCollector] --> IS
-        FC --> VS
-        VS -. advice .-> AG[AgentController]
-        AG -->|USER_CLICK| SM
-        SCH[CoolingScheduler] -->|TIMER| SM
-        SM --> PP
-        SM --> AU[(AuditLog)]
-        SM --> TS[TrustScoreService]
-        TS --> G
+    subgraph path["Backend request path (Spring Boot)"]
+        direction TB
+        ck[CheckoutController] --> g[GuardrailService]
+        g -->|"Layer 3: rule matched"| sm[OrderStateMachine]
+        g -->|"Layer 2: needs review"| is[InterrogationService]
+        is --> vs[VerdictService]
+        vs --> ag[AgentController]
+        ag -->|"USER_CLICK only"| sm
+        sch[CoolingScheduler] -->|"TIMER only"| sm
     end
 
-    FE <-->|REST| BE
-    PP <--> PayPal[(PayPal Sandbox)]
-    VS <--> LLM[(LLM API)]
-    IS <--> LLM
+    subgraph io["Integrations"]
+        direction LR
+        pp[PayPalClient]
+        paypal[(PayPal Sandbox)]
+        llm[(LLM API)]
+        pp <--> paypal
+    end
+
+    fc[FactCollector]
+    au[(AuditLog)]
+    ts[TrustScoreService]
+
+    UI -->|REST /api| ck
+    sm --> pp
+    sm --> au
+    sm --> ts
+    ts -.-> g
+    fc -.-> is
+    fc -.-> vs
+    is -.-> llm
+    vs -.-> llm
 ```
 
 ### The four layers
