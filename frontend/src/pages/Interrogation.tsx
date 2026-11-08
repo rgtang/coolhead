@@ -73,17 +73,29 @@ export default function Interrogation() {
   if (!order) return <p className="empty">{error ?? 'Loading…'}</p>
 
   const chatting = order.state === 'AUTHORIZED' && !order.verdict && !done
+  const terminal = order.state === 'CAPTURED' || order.state === 'VOIDED'
+
+  const pageSub = (() => {
+    if (chatting) return 'Payment is authorized but not captured. A few quick questions first.'
+    if (terminal && order.verdict?.source === 'GUARDRAIL') {
+      return order.state === 'CAPTURED'
+        ? 'Hard rule — payment captured. No AI, only the guardrail and your audit trail.'
+        : 'Hard rule — hold released. No AI involved.'
+    }
+    if (terminal) {
+      return order.state === 'CAPTURED'
+        ? 'Purchase complete. Every step is in the audit trail.'
+        : 'Hold released. Your money stays put.'
+    }
+    return 'Here is the balanced view. The decision — and the click — is yours.'
+  })()
 
   return (
     <>
       <h1 className="page-title">
         {order.productName} <span className="price" style={{ fontSize: 22, color: 'var(--muted)' }}>{money(order.amount)}</span>
       </h1>
-      <p className="page-sub">
-        {chatting
-          ? 'Payment is authorized but not captured. A few quick questions first.'
-          : 'Here is the balanced view. The decision — and the click — is yours.'}
-      </p>
+      <p className="page-sub">{pageSub}</p>
 
       <div className="convo">
         <section>
@@ -96,7 +108,9 @@ export default function Interrogation() {
               <div className="bubble assistant">
                 {order.verdict?.source === 'GUARDRAIL'
                   ? 'No conversation needed — a hard rule decided this one.'
-                  : 'The AI reviewer was unreachable, so the fail-safe default applies. No questions were asked.'}
+                  : order.verdict?.source === 'FALLBACK'
+                    ? 'No LLM API key (or provider down) — fail-safe 24h cool. No questions were asked.'
+                    : 'The AI reviewer was unreachable, so the fail-safe default applies. No questions were asked.'}
               </div>
             )}
             <div ref={bottomRef} />

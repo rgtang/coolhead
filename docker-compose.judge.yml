@@ -1,0 +1,6 @@
+# Optional overlay for hackathon judges: pre-filled dashboard, still no PayPal/LLM keys required.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.judge.yml up --build
+services:
+  backend:
+    environment:
+      COOLHEAD_SEED: "true"

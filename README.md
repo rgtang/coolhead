@@ -120,7 +120,13 @@ Both integrations degrade gracefully:
 | Missing | Behaviour |
 | --- | --- |
 | PayPal credentials | `PayPalClient` runs in **mock mode** (fake order/auth/capture ids, no network). Frontend shows a *Simulate PayPal approval* button. |
-| `LLM_API_KEY` | Interrogation is skipped and `VerdictService` returns the fail-safe **COOL 24h** verdict with an explanation. |
+| `LLM_API_KEY` | No call to the LLM provider. Interrogation is skipped and `VerdictService` returns the fail-safe **COOL 24h** verdict immediately. |
+
+Set `COOLHEAD_SEED=true` to start with history instead of an empty dashboard: 4 past orders from the last few days
+(a headphones hold **voided by the TIMER**, a 1 a.m. console **OVERRIDE**, sneakers **cancelled after cooling**, a
+whitelisted grocery capture), their full audit trail and transcripts, and trust scores `gaming 40`, `electronics 60`.
+Seeded orders are all CAPTURED/VOIDED and use fake `SEED-*` PayPal ids, so they never trigger a real PayPal call.
+Seeding is skipped if the database already has orders.
 
 ### 2a. One command (Docker)
 
@@ -129,6 +135,26 @@ docker compose up --build
 # frontend  http://localhost:5173
 # backend   http://localhost:8080   (H2 console at /h2)
 ```
+
+Docker builds the frontend with `VITE_API_BASE=""` so the browser talks to `/api` on the same origin and nginx proxies
+to the backend. The `VITE_API_BASE` line in `.env` is only for **local** `npm run dev`.
+
+### Judges / zero-config (~2 min)
+
+No PayPal or LLM keys required — only Docker.
+
+```bash
+git clone https://github.com/rgtang/coolhead.git && cd coolhead
+cp .env.example .env
+docker compose -f docker-compose.yml -f docker-compose.judge.yml up --build
+# open http://localhost:5173
+```
+
+1. **Dashboard** — seeded audit trail, trust scores (`gaming` 40, `electronics` 60), and past orders.
+2. **Weekly Grocery Box** → *Simulate PayPal approval* → **CAPTURED**, card shows `hard rule — no AI involved`.
+3. **Next-gen Game Console** → Simulate → fail-safe **COOL 24h** (no API key) → **Hold for 24h** → **Dashboard** updates.
+
+Add `LLM_API_KEY` and PayPal Sandbox credentials to `.env` for the full interrogation + real holds (see demo script below).
 
 ### 2b. Local dev
 
@@ -189,7 +215,7 @@ grace period if nobody decided.
 
 ```
 coolhead/
-├── README.md · LICENSE (MIT) · .env.example · docker-compose.yml
+├── README.md · LICENSE (MIT) · .env.example · docker-compose.yml · docker-compose.judge.yml
 ├── backend/                         Spring Boot 3.5 · Java 21 · Spring AI 1.0 · H2
 │   └── src/main/java/dev/you/coolhead/
 │       ├── config/      PayPalProperties · PolicyProperties · LlmConfig (system prompts) · WebConfig

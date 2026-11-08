@@ -35,6 +35,13 @@ public class AuditService {
         return repo.save(new AuditLog(orderId, trigger, action, detail, amount, category));
     }
 
+    /** Demo seeding only: record an entry with a historical timestamp. */
+    @Transactional
+    public AuditLog recordAt(String orderId, Trigger trigger, String action, String detail,
+                             BigDecimal amount, String category, Instant at) {
+        return repo.save(new AuditLog(orderId, trigger, action, detail, amount, category, at));
+    }
+
     @Transactional(readOnly = true)
     public List<AuditLog> recent() {
         return repo.findTop100ByOrderByCreatedAtDesc();

@@ -93,6 +93,9 @@ public class PurchaseOrder {
     void setPaypalCaptureId(String id) { this.paypalCaptureId = id; }
     void setOverrideReason(String reason) { this.overrideReason = reason; }
 
+    /** Demo seeding only: place a historical order in the past. */
+    void setTimestamps(Instant created, Instant updated) { this.createdAt = created; this.updatedAt = updated; }
+
     // ---- public mutators for agent data (not state)
     public void recordVerdict(String action, int coolingHours, String reasonToBuy, String reasonToWait, String source) {
         this.verdictAction = action;

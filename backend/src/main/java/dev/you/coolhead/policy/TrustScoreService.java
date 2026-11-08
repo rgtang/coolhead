@@ -57,6 +57,11 @@ public class TrustScoreService {
 
     // ---------------------------------------------------------------------------
 
+    /** Set an absolute score (demo seeding). */
+    public void set(String category, int score) {
+        scores.put(key(category), clamp(score));
+    }
+
     public int adjust(String category, int delta, String reason) {
         int next = scores.compute(key(category), (k, v) -> clamp((v == null ? DEFAULT : v) + delta));
         log.debug("trust[{}] {}{} -> {} ({})", category, delta >= 0 ? "+" : "", delta, next, reason);

@@ -50,6 +50,9 @@ coolhead:
     max-interrogation-turns: 3
   scheduler:
     scan-interval-ms: 60000
+  seed:
+    # Pre-populate 4 historical orders + audit trail + trust scores on startup (skipped if orders exist)
+    enabled: ${COOLHEAD_SEED:false}
 
 logging:
   level:

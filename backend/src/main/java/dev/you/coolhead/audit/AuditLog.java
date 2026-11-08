@@ -63,6 +63,13 @@ public class AuditLog {
         this.category = category;
     }
 
+    /** Demo seeding only: an entry that happened in the past. */
+    public AuditLog(String orderId, Trigger trigger, String action, String detail, BigDecimal amount, String category,
+                    Instant createdAt) {
+        this(orderId, trigger, action, detail, amount, category);
+        this.createdAt = createdAt;
+    }
+
     public Long getId() { return id; }
     public String getOrderId() { return orderId; }
     public Trigger getTrigger() { return trigger; }

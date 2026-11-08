@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.you.coolhead.config.LlmAvailability;
 import dev.you.coolhead.config.PolicyProperties;
 import dev.you.coolhead.order.OrderRepository;
 import dev.you.coolhead.order.PurchaseOrder;
@@ -29,23 +30,34 @@ public class VerdictService {
     public static final String SOURCE_LLM = "LLM";
     public static final String SOURCE_FALLBACK = "FALLBACK";
 
+    static final String FALLBACK_NO_KEY = "no API key configured";
+
     private final ChatClient judge;
     private final FactCollector facts;
     private final InterrogationService interrogation;
     private final OrderRepository orders;
     private final PolicyProperties policy;
+    private final LlmAvailability llm;
 
     public VerdictService(@Qualifier("judgeClient") ChatClient judge, FactCollector facts,
-                          InterrogationService interrogation, OrderRepository orders, PolicyProperties policy) {
+                          InterrogationService interrogation, OrderRepository orders, PolicyProperties policy,
+                          LlmAvailability llm) {
         this.judge = judge;
         this.facts = facts;
         this.interrogation = interrogation;
         this.orders = orders;
         this.policy = policy;
+        this.llm = llm;
     }
 
     @Transactional
     public Verdict decide(PurchaseOrder order) {
+        if (!llm.available()) {
+            Verdict verdict = Verdict.fallback(FALLBACK_NO_KEY);
+            store(order, verdict, SOURCE_FALLBACK);
+            return verdict;
+        }
+
         String prompt = facts.collect(order).render() + "\n" + interrogation.renderTranscript(order)
                 + "\nGive your verdict.";
 

@@ -18,6 +18,7 @@ services:
       context: ./frontend
       args:
         VITE_PAYPAL_CLIENT_ID: ${VITE_PAYPAL_CLIENT_ID:-}
+        # Same-origin /api via nginx (see frontend/nginx.conf); overrides VITE_API_BASE in .env for the image build.
         VITE_API_BASE: ""
     container_name: coolhead-frontend
     depends_on:

@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.you.coolhead.config.LlmAvailability;
 import dev.you.coolhead.config.PolicyProperties;
 import dev.you.coolhead.order.OrderRepository;
 import dev.you.coolhead.order.PurchaseOrder;
@@ -38,14 +39,17 @@ public class InterrogationService {
     private final OrderRepository orders;
     private final ObjectMapper mapper;
     private final PolicyProperties policy;
+    private final LlmAvailability llm;
 
     public InterrogationService(@Qualifier("interrogatorClient") ChatClient chat, FactCollector facts,
-                                OrderRepository orders, ObjectMapper mapper, PolicyProperties policy) {
+                                OrderRepository orders, ObjectMapper mapper, PolicyProperties policy,
+                                LlmAvailability llm) {
         this.chat = chat;
         this.facts = facts;
         this.orders = orders;
         this.mapper = mapper;
         this.policy = policy;
+        this.llm = llm;
     }
 
     /** Start the conversation: feed facts, get the first question. */
@@ -54,6 +58,10 @@ public class InterrogationService {
         List<Turn> transcript = new ArrayList<>();
         transcript.add(Turn.system(facts.collect(order).render()
                 + "\nThe user just authorized this purchase. Ask your first question."));
+        if (!llm.available()) {
+            save(order, transcript);
+            return new Reply(null, true, "UNAVAILABLE", transcript);
+        }
         return ask(order, transcript);
     }
 
@@ -94,6 +102,10 @@ public class InterrogationService {
     // ------------------------------------------------------------------------------------------------
 
     private Reply ask(PurchaseOrder order, List<Turn> transcript) {
+        if (!llm.available()) {
+            save(order, transcript);
+            return new Reply(null, true, "UNAVAILABLE", transcript);
+        }
         try {
             LlmTurn out = chat.prompt()
                     .messages(toMessages(transcript))
