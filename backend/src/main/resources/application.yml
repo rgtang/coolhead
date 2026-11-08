@@ -1,0 +1,56 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: coolhead
+  datasource:
+    url: jdbc:h2:mem:coolhead;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2
+      # Without this, the login page shows "webAllowOthers are disabled" (common in Docker / non-localhost).
+      settings:
+        web-allow-others: true
+  ai:
+    # Talks to any OpenAI-compatible endpoint. Defaults point at Google Gemini's free tier.
+    # For OpenAI itself: LLM_BASE_URL=https://api.openai.com, LLM_COMPLETIONS_PATH=/v1/chat/completions, LLM_MODEL=gpt-4o-mini
+    openai:
+      api-key: ${LLM_API_KEY:missing}
+      base-url: ${LLM_BASE_URL:https://generativelanguage.googleapis.com}
+      chat:
+        completions-path: ${LLM_COMPLETIONS_PATH:/v1beta/openai/chat/completions}
+        options:
+          model: ${LLM_MODEL:gemini-3.5-flash}
+          temperature: 0.3
+
+coolhead:
+  paypal:
+    client-id: ${PAYPAL_CLIENT_ID:}
+    client-secret: ${PAYPAL_CLIENT_SECRET:}
+    base-url: ${PAYPAL_BASE_URL:https://api-m.sandbox.paypal.com}
+    currency: USD
+  policy:
+    # Layer 3 hard rules (run before any LLM call)
+    whitelist-categories: groceries,utilities
+    auto-release-below: 20.00        # below this amount: capture immediately
+    force-cool-above: 1000.00        # above this amount: always cool for max hours, no debate
+    auto-release-trust: 85           # category trust >= this behaves like whitelist
+    # Cooling clamp (applied by OrderStateMachine, never by the LLM)
+    min-cooling-hours: 1
+    max-cooling-hours: 72
+    void-grace-hours: 24             # after cooling ends + grace with no click -> timer voids
+    max-interrogation-turns: 3
+  scheduler:
+    scan-interval-ms: 60000
+
+logging:
+  level:
+    dev.you.coolhead: DEBUG

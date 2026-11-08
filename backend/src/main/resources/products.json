@@ -1,0 +1,66 @@
+[
+  {
+    "id": "p-headphones",
+    "name": "Noise-cancelling Headphones Pro",
+    "category": "electronics",
+    "price": 349.00,
+    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600",
+    "blurb": "Studio-grade ANC. You already own two pairs."
+  },
+  {
+    "id": "p-sneakers",
+    "name": "Limited Drop Sneakers",
+    "category": "fashion",
+    "price": 189.00,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+    "blurb": "Only 300 pairs. Countdown timer included."
+  },
+  {
+    "id": "p-groceries",
+    "name": "Weekly Grocery Box",
+    "category": "groceries",
+    "price": 42.50,
+    "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600",
+    "blurb": "Vegetables, eggs, bread. Whitelisted."
+  },
+  {
+    "id": "p-electric",
+    "name": "Electricity Bill — November",
+    "category": "utilities",
+    "price": 96.20,
+    "image": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600",
+    "blurb": "Due in 3 days. Whitelisted."
+  },
+  {
+    "id": "p-console",
+    "name": "Next-gen Game Console",
+    "category": "gaming",
+    "price": 499.00,
+    "image": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600",
+    "blurb": "It's 1 a.m. and the trailer was really good."
+  },
+  {
+    "id": "p-treadmill",
+    "name": "Smart Treadmill X",
+    "category": "fitness",
+    "price": 1299.00,
+    "image": "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=600",
+    "blurb": "New year, new me. Force-cooled above $1000."
+  },
+  {
+    "id": "p-keyboard",
+    "name": "Custom Mechanical Keyboard",
+    "category": "hobby",
+    "price": 159.00,
+    "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600",
+    "blurb": "Your fourth keyboard this year."
+  },
+  {
+    "id": "p-coffee",
+    "name": "Coffee Beans 250g",
+    "category": "groceries",
+    "price": 14.90,
+    "image": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600",
+    "blurb": "Under $20, auto-released."
+  }
+]
