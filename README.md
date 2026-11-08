@@ -13,32 +13,33 @@ clock does, and the audit log proves it.
 
 ```mermaid
 flowchart LR
-    subgraph FE[frontend · React + Vite]
-        S[Store.tsx] --> C[Checkout.tsx<br/>PayPal Buttons · intent=AUTHORIZE]
-        C --> I[Interrogation.tsx<br/>chat · verdict card · override]
-        I --> D[Dashboard.tsx<br/>audit · stopped $X · trust]
+    subgraph FE["Frontend: React + Vite"]
+        S[Store] --> C[Checkout]
+        C --> I[Interrogation]
+        I --> D[Dashboard]
     end
 
-    subgraph BE[backend · Spring Boot 3 + Spring AI]
-        CK[CheckoutController] --> PP[PayPalClient<br/>OAuth cache · create/authorize/capture/void]
-        CK --> G{{"Layer 3 · GuardrailService<br/>whitelist · &lt;$20 · &gt;$1000 · trust≥85"}}
-        G -- rule fired --> SM
-        G -- no rule --> IS["Layer 2 · InterrogationService<br/>≤3 questions · urgency signal"]
-        IS --> VS["VerdictService<br/>facts + transcript → LLM → Verdict"]
-        FC[FactCollector<br/>monthly spend · repeats · hour · trust] --> IS
+    subgraph BE["Backend: Spring Boot + Spring AI"]
+        CK[CheckoutController] --> PP[PayPalClient]
+        CK --> G[GuardrailService]
+        G -->|rule fired| SM[OrderStateMachine]
+        G -->|no rule| IS[InterrogationService]
+        IS --> VS[VerdictService]
+        FC[FactCollector] --> IS
         FC --> VS
-        VS -. advice only .-> AG[AgentController<br/>accept · override · confirm · cancel]
-        AG -- USER_CLICK --> SM[OrderStateMachine<br/>clamp 1–72h · only place state changes]
-        SCH[CoolingScheduler<br/>@Scheduled] -- TIMER --> SM
+        VS -. advice .-> AG[AgentController]
+        AG -->|USER_CLICK| SM
+        SCH[CoolingScheduler] -->|TIMER| SM
         SM --> PP
-        SM --> AU[(AuditLog<br/>trigger ∈ TIMER, USER_CLICK)]
-        SM --> TS[Layer 4 · TrustScoreService]
+        SM --> AU[(AuditLog)]
+        SM --> TS[TrustScoreService]
         TS --> G
     end
 
-    FE <-->|/api| BE
+    FE <-->|REST| BE
     PP <--> PayPal[(PayPal Sandbox)]
-    IS & VS <--> LLM[(Gemini · OpenAI-compatible API)]
+    VS <--> LLM[(LLM API)]
+    IS <--> LLM
 ```
 
 ### The four layers
