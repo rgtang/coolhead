@@ -1,9 +1,15 @@
-import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { useEffect, type ReactNode } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <div className="shell">
       <header className="topbar">

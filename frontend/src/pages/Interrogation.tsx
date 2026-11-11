@@ -34,9 +34,18 @@ export default function Interrogation() {
     return () => clearInterval(id)
   }, [order?.state, refresh])
 
+  // follow new chat turns, but never jump on the initial load of an order (.chat is not a scroll container,
+  // so scrollIntoView moves the whole window)
+  const lastTurns = useRef<{ id: string; n: number } | null>(null)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [order?.transcript.length, busy])
+    if (!order) return
+    const prev = lastTurns.current
+    lastTurns.current = { id: order.id, n: order.transcript.length }
+    if (prev?.id !== order.id) return
+    if (order.transcript.length > prev.n || (busy && !order.verdict)) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [order, busy])
 
   const run = async (fn: () => Promise<OrderView>) => {
     setBusy(true)
