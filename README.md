@@ -14,7 +14,7 @@
 | --- | --- |
 | **Repository** | [github.com/rgtang/coolhead](https://github.com/rgtang/coolhead) |
 | **Live demo** | [coolhead-1.onrender.com](https://coolhead-1.onrender.com/) |
-| **Demo video** | _TODO — add link_ |
+| **Demo video** | [youtu.be/m6YAPBVEHU8](https://youtu.be/m6YAPBVEHU8) |
 | **License** | [MIT](./LICENSE) (visible in repo About) |
 
 Render free tier may **sleep** after idle time; first load can take ~30–60s.
